@@ -66,16 +66,28 @@ app.get('/urls/:shortURL', (req, res) => {
     res.render('urls_show', templateVars);  
 });
 
+/** 
+ * TODO: 
+ * set up a 404 and a server page
+ * refactor code to keep it DRY
+ * add a functionality to check for valid url format
+ * order of POST and GET 
+ * 
+ */
+
+
 // routing the post request to change the longURl
 app.post('/urls/:shortURL', (req, res) => {
-  const longURL = `https://${req.body.longURL}`;
+  let longURL = req.body.longURL;
+    // do nothing if the input is empty
   if(!longURL){
-    return;
+    res.send('Invalid URL. Go back and try again')
+    return
   }
   urlDatabase[req.params.shortURL] = longURL;
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: longURL
+    longURL
   };
   res.render('urls_show', templateVars);
 })

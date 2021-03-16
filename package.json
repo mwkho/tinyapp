@@ -4,7 +4,7 @@
   "description": "",
   "main": "express-serve.js",
   "scripts": {
-    "start": "./node_modules/nodemon/.bin/nodemon -L express-server.js",
+    "start": "./node_modules/nodemon/bin/nodemon.js -L express-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
