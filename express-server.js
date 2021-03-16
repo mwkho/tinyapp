@@ -37,6 +37,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// making a POST request to change long url to short url
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = 'https://' + req.body.longURL;
