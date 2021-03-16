@@ -25,11 +25,12 @@ const generateRandomString = (num) =>  {
 };
 
 app.get('/', (req, res) => {
-  res.send('Hello');
+  const templateVars = {urls: urlDatabase};
+  res.render('urls_index', templateVars);
 });
 
 app.get('/hello', (req, res) => {
-  res.send("<html><body> Hello <b>World</b> </body> </html>\n");
+  res.send('<html><body> Hello <b>World</b> </body> </html>\n');
 });
 
 app.get('/urls', (req, res) => {
@@ -38,7 +39,7 @@ app.get('/urls', (req, res) => {
 });
 
 // making a POST request to change long url to short url
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = 'https://' + req.body.longURL;
   urlDatabase[randomString] = longURL;
@@ -46,9 +47,14 @@ app.post("/urls", (req, res) => {
   
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL]
+  res.redirect('/urls')
+});
+
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
-  res.render("urls_new")
+  res.render('urls_new')
 });
 
 // routing to a page with short and long url 
@@ -59,8 +65,7 @@ app.get('/urls/:shortURL', (req, res) => {
     };
     res.render('urls_show', templateVars);  
 });
-
-
+   
 app.get('/u/:shortURL', (req,res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
