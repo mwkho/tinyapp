@@ -56,6 +56,7 @@ app.get("/urls.json", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);
+  const randomString = generateRandomString(6);
   res.send('ok')
 });
 
