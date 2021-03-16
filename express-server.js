@@ -59,9 +59,13 @@ app.get('/urls/new', (req, res) => {
 
 // routing to a page with short and long url 
 app.get('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  if (Object.keys(req.params).findIndex(shortURL) === -1){
+    res.redirect('*');
+  }
    const templateVars = {
-     shortURL: req.params.shortURL,
-     longURL : urlDatabase[req.params.shortURL]
+     shortURL,
+     longURL : urlDatabase[shortURL]
     };
     res.render('urls_show', templateVars);  
 });
@@ -71,19 +75,11 @@ app.get('/urls/:shortURL', (req, res) => {
  * set up a 404 and a server page
  * refactor code to keep it DRY
  * add a functionality to check for valid url format
- * order of POST and GET 
- * 
  */
-
 
 // routing the post request to change the longURl
 app.post('/urls/:shortURL', (req, res) => {
   let longURL = req.body.longURL;
-    // do nothing if the input is empty
-  if(!longURL){
-    res.send('Invalid URL. Go back and try again')
-    return
-  }
   urlDatabase[req.params.shortURL] = longURL;
   const templateVars = {
     shortURL: req.params.shortURL,
@@ -98,10 +94,13 @@ app.get('/u/:shortURL', (req,res) => {
 })
 
 
-app.get("/urls.json", (req, res) => {
+app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get('*', (req, res) => {
+  res.status(404).send('Error 404: Unable to find the requested resource!');
+});
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port: ${PORT}`);
