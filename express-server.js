@@ -65,6 +65,20 @@ app.get('/urls/:shortURL', (req, res) => {
     };
     res.render('urls_show', templateVars);  
 });
+
+// routing the post request to change the longURl
+app.post('/urls/:shortURL', (req, res) => {
+  const longURL = `https://${req.body.longURL}`;
+  if(!longURL){
+    return;
+  }
+  urlDatabase[req.params.shortURL] = longURL;
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: longURL
+  };
+  res.render('urls_show', templateVars);
+})
    
 app.get('/u/:shortURL', (req,res) => {
   const longURL = urlDatabase[req.params.shortURL];
