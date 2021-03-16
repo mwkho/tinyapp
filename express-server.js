@@ -1,6 +1,7 @@
 // header variables and settings
 const express = require('express');
 const bodyParser = require('body-parser');
+const { render } = require('ejs');
 const app  = express();
 const PORT =  8080;
 
@@ -38,11 +39,11 @@ app.get('/urls', (req, res) => {
 
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString(6);
-  let longURL = req.body.longURL;
-  urlDatabase[randomString] = req.body.longURL
+  let longURL = 'https://'+req.body.longURL;
+  urlDatabase[randomString] = longURL;
   let templateVars = {
     shortURL: randomString, 
-    longURL: urlDatabase[randomString]
+    longURL: longURL
   };
   res.render('urls_show', templateVars);
 });
@@ -53,19 +54,17 @@ app.get('/urls/new', (req, res) => {
 });
 
 // routing to a page with short and long url 
-app.get('/urls/:shortURL', (req, res) => {
-  const templateVars = {
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL]
-  };  
-  res.render('urls_show', templateVars);  
+app.get('/u/:shortURL', (req, res) => {
+  // const templateVars = {
+  //   shortURL: req.params.shortURL, 
+  const longURL = urlDatabase[req.params.shortURL];
+  // res.render('urls_show', templateVars);  
+  res.redirect(longURL);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-
 
 
 app.listen(PORT, () => {
