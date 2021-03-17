@@ -21,6 +21,9 @@
         <input type = "url" name = "longURL">
         <button>Update</button>
       </form>
+      <% if(!longURL) {%>
+        <p>Empty URL not allowed!</p>  
+      <% }%>
     <div class="card-footer text-muted"></div>
   </div>
   <!-- Bootstrap JS -->
