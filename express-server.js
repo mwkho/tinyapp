@@ -116,7 +116,7 @@ app.post('/register', (req, res) => {
 
 // setting up username cookies for login
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('user_id', req.body.userId);
   res.redirect('/urls');
 });
 
