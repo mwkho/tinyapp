@@ -1,14 +1,14 @@
 // global variables and functions
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const { render } = require('ejs');
 const app  = express();
 const PORT =  8080;
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
-app.use(cookieParser())
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -39,7 +39,7 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   const templateVars = {
     username: req.cookies["username"]
-  }
+  };
   res.render('urls_new', templateVars);
 });
 
@@ -72,7 +72,7 @@ app.get('/*', (req, res) => {
 
 // setting up username cookies for login
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username)
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
