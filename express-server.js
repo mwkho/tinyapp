@@ -25,21 +25,30 @@ const users = {
       id:'user2',
       email: 'user2@example.com',
       password: 'monkeyfuzz'
-    },
-    addNewUser: (userId, email, password) => {
-      this[userID] = {     
-        userId,
-        email,
-        password
-      };
-    },
-
-    getUser: (id) => {
-      return this[id];
     }
 };
 
-const generateRandomString = (num) =>  {
+const addNewUser = (userId, email, password) => {
+  users[userId] = {     
+    userId,
+    email,
+    password
+  };
+}
+
+const getUser = (id) => {
+  return users[id];
+}
+
+const getUserId = (email, password) => {
+  for (let id in users){
+    if (users[id].email === email && users[id].password === password){
+      return id;
+    }
+  }
+}
+
+const generateRandomString = (num) => {
   const char = "abcdefghijklmnopqrstuvwxyz0123456789";
   let random = '';
   for (let i = 0; i < num; i++) {
@@ -50,26 +59,30 @@ const generateRandomString = (num) =>  {
 
 // start of tinyapp
 app.get('/', (req, res) => {
-  const user = users.getUser(req.cookies['user_id']);
+  const user = getUser(req.cookies['user_id']);
   const templateVars = {urls: urlDatabase, user};
   res.render('urls_index', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  const user = users.getUser(req.cookies['user_id']);
+  const user = getUser(req.cookies['user_id']);
   const templateVars = {user}  
   res.render('register', templateVars);
 })
 
 app.get('/urls', (req, res) => {
-  const user = users.getUser(req.cookies['user_id']);
-  const templateVars = {urls: urlDatabase, user};
+  const user = getUser(req.cookies['user_id']);
+  console.log(req.cookies['user_id'])
+  const templateVars = {
+    urls: urlDatabase,
+    user
+  };
   res.render('urls_index', templateVars);
 });
 
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
-  const user = users.getUser(req.cookies['user_id']);
+  const user = getUser(req.cookies['user_id']);
   const templateVars = {
     user
   };
@@ -79,7 +92,7 @@ app.get('/urls/new', (req, res) => {
 // routing to a page with short and long url
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const user = users.getUser(req.cookies['user_id']);
+  const user = getUser(req.cookies['user_id']);
   // if the shortURL does not exist, send them to 404
   if (Object.keys(urlDatabase).indexOf(shortURL) === -1) {
     res.redirect('/*');
@@ -109,14 +122,15 @@ app.get('/*', (req, res) => {
 // post of registering a new user
 app.post('/register', (req, res) => {
   const userId = generateRandomString(6); 
-  users.addNewUser(userId, req.body.email, req.body.password);
+  addNewUser(userId, req.body.email, req.body.password);
   res.cookie('user_id', userId);
   res.redirect('/urls');
 })
 
-// setting up username cookies for login
+// setting up userId cookies for login
 app.post('/login', (req, res) => {
-  res.cookie('user_id', req.body.userId);
+  const userId = getUserId(req.body.email, req.body.password)
+  res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
@@ -136,7 +150,7 @@ app.post('/urls', (req, res) => {
 
 // routing the post request to change the longURl
 app.post('/urls/:shortURL', (req, res) => {
-  const user = users.getUser(req.cookies['user_id']);
+  const user = getUser(req.cookies['user_id']);
   let longURL = req.body.longURL;
   // only update the database if non-empty input
   if (longURL){
