@@ -12,7 +12,8 @@
     </div>
     <%if (!user){%>
     <form method="post" action="/login">
-      <input type="text" placeholder="Username" name="user.email">
+      <input type="email" placeholder="email" name="email">
+      <input type="password" placeholder="password" name="password">
       <button type="submit">Login</button>
     </form>
     <% } else {%>
