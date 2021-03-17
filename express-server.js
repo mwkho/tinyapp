@@ -27,18 +27,21 @@ const generateRandomString = (num) =>  {
 
 // start of tinyapp
 app.get('/', (req, res) => {
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render('urls_index', templateVars);
 });
 
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = {
+    username: req.cookies["username"]
+  }
+  res.render('urls_new', templateVars);
 });
 
 // routing to a page with short and long url
@@ -49,7 +52,8 @@ app.get('/urls/:shortURL', (req, res) => {
   }
   const templateVars = {
     shortURL,
-    longURL : urlDatabase[shortURL]
+    longURL : urlDatabase[shortURL],
+    username: req.cookies["username"]
   };
   res.render('urls_show', templateVars);
 });
@@ -77,10 +81,9 @@ app.post('/login', (req, res) => {
 // making a POST request to change long url to short url
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
-  let longURL = 'https://' + req.body.longURL;
+  let longURL = req.body.longURL;
   urlDatabase[randomString] = longURL;
   res.redirect(`/urls/${randomString}`);
-  
 });
 
 // routing the post request to change the longURl
@@ -89,7 +92,8 @@ app.post('/urls/:shortURL', (req, res) => {
   urlDatabase[req.params.shortURL] = longURL;
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL
+    longURL,
+    username: req.cookies["username"]
   };
   res.render('urls_show', templateVars);
 });
@@ -98,7 +102,6 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port: ${PORT}`);
