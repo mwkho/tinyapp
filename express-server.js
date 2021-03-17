@@ -40,9 +40,9 @@ const getUser = (id) => {
   return users[id];
 }
 
-const getUserId = (email, password) => {
+const getUserId = (email) => {
   for (let id in users){
-    if (users[id].email === email && users[id].password === password){
+    if (users[id].email === email){
       return id;
     }
   }
@@ -72,7 +72,6 @@ app.get('/register', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const user = getUser(req.cookies['user_id']);
-  console.log(req.cookies['user_id'])
   const templateVars = {
     urls: urlDatabase,
     user
@@ -121,8 +120,21 @@ app.get('/*', (req, res) => {
 
 // post of registering a new user
 app.post('/register', (req, res) => {
-  const userId = generateRandomString(6); 
-  addNewUser(userId, req.body.email, req.body.password);
+  const email = req.body.email.trim();
+  const password = req.body.password.trim();
+  
+  if (!(email && password)){
+    console.log('im here')
+    res.status(400).send("400: email and password not allowed to be empty");
+    return;
+  }
+
+  if(getUserId(email, password)){
+    res.status(400).send("400: User already exist");
+    return;
+  }
+  const userId = generateRandomString(6);
+  addNewUser(userId, email, password);
   res.cookie('user_id', userId);
   res.redirect('/urls');
 })
