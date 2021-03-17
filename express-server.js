@@ -93,10 +93,13 @@ app.post('/urls', (req, res) => {
 // routing the post request to change the longURl
 app.post('/urls/:shortURL', (req, res) => {
   let longURL = req.body.longURL;
-  urlDatabase[req.params.shortURL] = longURL;
+  // only update the database if non-empty input
+  if (longURL){
+    urlDatabase[req.params.shortURL] = longURL;
+  }
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL,
+    longURL: urlDatabase[req.params.shortURL],
     username: req.cookies["username"]
   };
   res.render('urls_show', templateVars);
