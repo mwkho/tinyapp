@@ -12,12 +12,11 @@
     </div>
     <%if (!username){%>
     <form method="post" action="/login">
-      <label for="username">Username:</label>
-      <input type="text" name="username">
+      <input type="text" placeholder="Username" name="username">
       <button type="submit">Login</button>
     </form>
     <% } else {%>
-    <p>Welcome, <%= username%>!</p>
+    <p>Welcome, <%= username%></p>
     <form method="post" action="/logout">
       <button type="submit">Logout</button>
     </form>
