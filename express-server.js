@@ -30,6 +30,11 @@ app.get('/', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/register', (req, res) => {
+  const templateVars = {username: req.cookies["username"]}  
+  res.render('register', templateVars);
+})
+
 app.get('/urls', (req, res) => {
   const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render('urls_index', templateVars);
@@ -46,8 +51,10 @@ app.get('/urls/new', (req, res) => {
 // routing to a page with short and long url
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
+  // if the shortURL does not exist, send them to 404
   if (Object.keys(urlDatabase).indexOf(shortURL) === -1) {
     res.redirect('/*');
+    return;
   }
   const templateVars = {
     shortURL,
