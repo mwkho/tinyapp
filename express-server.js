@@ -25,18 +25,19 @@ const users = {
       id:'user2',
       email: 'user2@example.com',
       password: 'monkeyfuzz'
+    },
+    addNewUser: (userId, email, password) => {
+      this[userID] = {     
+        userId,
+        email,
+        password
+      };
+    },
+
+    getUser: (id) => {
+      return this[id];
     }
 };
-
-const addNewUser = (email, password) => {
-  const userId = generateRandomString(6);
-  const newUser = {
-    id: userId,
-    email: email,
-    password: password
-  };
-  return newUser;
-}
 
 const generateRandomString = (num) =>  {
   const char = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -49,24 +50,28 @@ const generateRandomString = (num) =>  {
 
 // start of tinyapp
 app.get('/', (req, res) => {
-  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  const user = users.getUser(req.cookies['user_id']);
+  const templateVars = {urls: urlDatabase, user};
   res.render('urls_index', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  const templateVars = {username: req.cookies["username"]}  
+  const user = users.getUser(req.cookies['user_id']);
+  const templateVars = {user}  
   res.render('register', templateVars);
 })
 
 app.get('/urls', (req, res) => {
-  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  const user = users.getUser(req.cookies['user_id']);
+  const templateVars = {urls: urlDatabase, user};
   res.render('urls_index', templateVars);
 });
 
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
+  const user = users.getUser(req.cookies['user_id']);
   const templateVars = {
-    username: req.cookies["username"]
+    user
   };
   res.render('urls_new', templateVars);
 });
@@ -74,15 +79,16 @@ app.get('/urls/new', (req, res) => {
 // routing to a page with short and long url
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
+  const user = users.getUser(req.cookies['user_id']);
   // if the shortURL does not exist, send them to 404
   if (Object.keys(urlDatabase).indexOf(shortURL) === -1) {
     res.redirect('/*');
     return;
   }
   const templateVars = {
+    user,
     shortURL,
     longURL : urlDatabase[shortURL],
-    username: req.cookies["username"]
   };
   res.render('urls_show', templateVars);
 });
@@ -100,24 +106,23 @@ app.get('/*', (req, res) => {
   res.status(404).send('Error 404: Unable to find the requested resource!');
 });
 
+// post of registering a new user
+app.post('/register', (req, res) => {
+  const userId = generateRandomString(6); 
+  users.addNewUser(userId, req.body.email, req.body.password);
+  res.cookie('user_id', userId);
+  res.redirect('/urls');
+})
+
 // setting up username cookies for login
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
-// post of registering a new user
-app.post('/register', (req, res) => {
-    const newUser = addNewUser(req.body.email, req.body.password)
-  users[newUser.id] = newUser;
-  console.log(users);
-  res.cookie('user_id', newUser.id);
-  res.redirect('/urls');
-})
-
 //logout routing
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
@@ -131,15 +136,16 @@ app.post('/urls', (req, res) => {
 
 // routing the post request to change the longURl
 app.post('/urls/:shortURL', (req, res) => {
+  const user = users.getUser(req.cookies['user_id']);
   let longURL = req.body.longURL;
   // only update the database if non-empty input
   if (longURL){
     urlDatabase[req.params.shortURL] = longURL;
   }
   const templateVars = {
+    user,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
   };
   res.render('urls_show', templateVars);
 });
