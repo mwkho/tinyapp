@@ -6,7 +6,6 @@ const { render } = require('ejs');
 const app  = express();
 const PORT =  8080;
 
-
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
 app.use(cookieParser())
@@ -71,10 +70,15 @@ app.get('/*', (req, res) => {
   res.status(404).send('Error 404: Unable to find the requested resource!');
 });
 
-// setting up username cookies
+// setting up username cookies for login
 app.post('/login', (req, res) => {
-  console.log('Cookies: ', )
   res.cookie('username', req.body.username)
+  res.redirect('/urls');
+});
+
+//logout routing
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 
