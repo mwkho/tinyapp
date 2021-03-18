@@ -57,6 +57,13 @@ const generateRandomString = (num) => {
   return random;
 };
 
+
+/**TODO:
+ * fix bug of shortenting an empty long url
+ * 
+ */
+
+
 // start of tinyapp
 app.get('/', (req, res) => {
   const user = getUser(req.cookies['user_id']);
@@ -68,6 +75,11 @@ app.get('/register', (req, res) => {
   const user = getUser(req.cookies['user_id']);
   const templateVars = {user}  
   res.render('register', templateVars);
+})
+app.get('/login', (req, res) => {
+  const user = getUser(req.cookies['user_id']);
+  const templateVars = {user}  
+  res.render('login', templateVars)
 })
 
 app.get('/urls', (req, res) => {
@@ -141,7 +153,15 @@ app.post('/register', (req, res) => {
 
 // setting up userId cookies for login
 app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
   const userId = getUserId(req.body.email, req.body.password)
+  if (!userId){
+    res.status(403).send('No such user exists');
+  }
+  if (users[userId].password !== password){
+    res.status(403).send(`Incorrect password for email: ${email}`);
+  }
   res.cookie('user_id', userId);
   res.redirect('/urls');
 });
