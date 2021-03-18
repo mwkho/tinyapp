@@ -2,6 +2,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session')
+const {
+  addNewUser,
+  urlsForUser,
+  getUser,
+  getUserId,
+  generateRandomString
+} = require ('./helper');
 const bcrypt = require('bcryptjs');
 const { render } = require('ejs');
 const app  = express();
@@ -20,62 +27,8 @@ const urlDatabase = {
 };
 
 const users = {
-    'user1' : {
-      id: 'user1',
-      email: 'user1@example.com',
-      password: 'monkeyfuz'
-    },
-    'user2': {
-      id:'user2',
-      email: 'user2@example.com',
-      password: 'monkeyfuzz'
-    }
 };
 
-const addNewUser = (userId, email, password) => {
-  users[userId] = {     
-    userId,
-    email,
-    password
-  };
-}
-
-const urlsForUser = (id) => {
-  const urls = {}
-  for (let url in urlDatabase){
-    if (urlDatabase[url].userId === id){
-      urls[url] = urlDatabase[url];
-    };
-  };
-  return urls;
-}
-const getUser = (id) => {
-  return users[id];
-}
-
-const getUserId = (email) => {
-  for (let id in users){
-    if (users[id].email === email){
-      return id;
-    }
-  }
-}
-
-const generateRandomString = (num) => {
-  const char = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let random = '';
-  for (let i = 0; i < num; i++) {
-    random += char[Math.floor(Math.random() * char.length)];
-  }
-  return random;
-};
-
-const accessAllowed = (userId, shortURL,res) => {
-    if (userId !== urlDatabase[shortURL]['userId']) {
-      res.status(403).send('Error 403: Forbidden access')
-      return
-  };
-}
 /**TODO:
  * fix bug of shortenting an empty long url
  * refactor code (if possible)
@@ -84,40 +37,38 @@ const accessAllowed = (userId, shortURL,res) => {
 
 // start of tinyapp
 app.get('/', (req, res) => {
-  const user = getUser(req.session.user_id);
-  const urls = urlsForUser(req.session.user_id);
+  const userId = req.session.user_id
+  const user = getUser(userId, users);
+  const urls = urlsForUser(userId);
   const templateVars = {urls, user};
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls', (req, res) => {
-  const user = getUser(req.session.user_id);
-  const urls = urlsForUser(req.session.user_id);
+  const user = getUser(req.session.user_id, users);
+  const urls = urlsForUser(req.session.user_id, urlDatabase);
   const templateVars = {urls, user};
   res.render('urls_index', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(req.session.user_id, users);
   const templateVars = {user}  
   res.render('register', templateVars);
 })
 app.get('/login', (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(req.session.user_id, users);
   const templateVars = {user}  
   res.render('login', templateVars)
 })
 
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
-  const user = getUser(req.session.user_id);
+  const user = getUser(req.session.user_id, users);
   if (!user){ 
-    res.redirect('/login')
-    return
+    return res.redirect('/login')
   }
-  const templateVars = {
-    user
-  };
+  const templateVars = {user};
   res.render('urls_new', templateVars);
 });
 
@@ -125,7 +76,7 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const userId = req.session.user_id;
-  const user = getUser(userId);
+  const user = getUser(userId, users);
 
   // if the shortURL does not exist, send them to 404
   if (!urlDatabase[shortURL]) {
@@ -170,7 +121,7 @@ app.post('/register', (req, res) => {
     res.status(400).send('Error 400: email and password not allowed to be empty\n');
     return;
   };
-  if(getUserId(email)){
+  if(getUserId(email, users)){
     res.status(400).send('Error 400: User already exist\n');
     return;
   };
@@ -178,7 +129,7 @@ app.post('/register', (req, res) => {
   bcrypt.genSalt(10)
   .then((salt) => {
       bcrypt.hash(unhashPassword, salt, (err, hash) => {
-        addNewUser(userId, email, hash);
+        addNewUser(userId, email, hash, users);
         req.session.user_id = userId;
         res.redirect('/urls');
       })
@@ -189,16 +140,13 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userId = getUserId(email);
+  const userId = getUserId(email, users);
 
-  if (!userId){
-    res.status(403).send('No such user exists\n');
+  if (!userId || !bcrypt.compareSync(password, users[userId].password)){
+    res.status(403).send('Error 403: Email or password is incorrect');
     return
   }
-  if (!bcrypt.compareSync(password, users[userId].password)){
-    res.status(403).send(`Incorrect password for email \n`);
-    return
-  }
+
   req.session.user_id = userId;
   res.redirect('/urls');
 });
@@ -230,7 +178,7 @@ app.post('/urls/:shortURL', (req, res) => {
     return;
   }
 
-  const user = getUser(userId);
+  const user = getUser(userId, users);
   const longURL = req.body.longURL;
   // only update the database if non-empty input
   if (longURL){
