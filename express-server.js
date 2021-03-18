@@ -11,8 +11,8 @@ app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "aJ48lW" },
+  "9sm5xK": {longURL: "http://www.google.com" , userId: "aJ48lW" }
 };
 
 const users = {
@@ -94,6 +94,10 @@ app.get('/urls', (req, res) => {
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
   const user = getUser(req.cookies['user_id']);
+  if (!user){ 
+    res.redirect('/login')
+    return
+  }
   const templateVars = {
     user
   };
@@ -112,13 +116,13 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     user,
     shortURL,
-    longURL : urlDatabase[shortURL],
+    longURL : urlDatabase[shortURL].longURL,
   };
   res.render('urls_show', templateVars);
 });
    
 app.get('/u/:shortURL', (req,res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -176,7 +180,7 @@ app.post('/logout', (req, res) => {
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = req.body.longURL;
-  urlDatabase[randomString] = longURL;
+  urlDatabase[randomString].longURL = longURL;
   res.redirect(`/urls/${randomString}`);
 });
 
