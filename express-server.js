@@ -108,7 +108,6 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars)
 })
 
-
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
   const user = getUser(req.session.user_id);
