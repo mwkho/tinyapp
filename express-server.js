@@ -122,7 +122,7 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const userId = req.cookies['user_id'];
-  const user = getUser(req.cookies[userId]);
+  const user = getUser(userId);
 
   // if the shortURL does not exist, send them to 404
   if (!urlDatabase[shortURL]) {
@@ -134,7 +134,7 @@ app.get('/urls/:shortURL', (req, res) => {
     res.status(403).send('Error 403: Forbidden Access');
     return;
   }
-  
+
   const longURL = urlDatabase[shortURL].longURL;
   const templateVars = {
     user,
