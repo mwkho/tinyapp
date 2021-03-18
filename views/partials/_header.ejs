@@ -10,17 +10,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <%if (!user){%>
-    <form method="post" action="/login">
-      <input type="email" placeholder="email" name="email">
-      <input type="password" placeholder="password" name="password">
+    <form action="/register" method="GET">
+      <button type="submit">Register</button>
+    </form>
+    <form action="/login" method="GET">
       <button type="submit">Login</button>
     </form>
-    <% } else {%>
-    <p>Welcome, <%= user.email%></p>
-    <form method="post" action="/logout">
-      <button type="submit">Logout</button>
-    </form>
-    <%} %>
   </nav>
 </header>

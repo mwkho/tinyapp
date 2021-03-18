@@ -3,7 +3,7 @@
 <head>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>URL - TinyApp Example</title>
+  <title>Register - TinyApp</title>
 </head>
 <header>
   <%- include("./partials/_header"); %>
@@ -12,16 +12,16 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-      <form method="POST" action="/register">
-        <div class="card-body">
-        <label for ="email">Your Email</label>
-        <input type="email"  name="email" placeholder="john@example.com" required>
-      </div>
-      <div class="card-body"> 
-      <label for="password">Your Password</label>
-        <input type="password" name="password" required>
-        <br>
-        <button type="submit">Register</button>
+        <form method="POST" action="/register">
+          <div class="card-body">
+            <label for ="email">Your Email</label>
+            <input type="email"  name="email" placeholder="john@example.com">
+          </div>
+          <div class="card-body"> 
+            <label for="password">Your Password</label>
+            <input type="password" name="password">
+            <br>
+          <button type="submit">Register</button>
       </form>
     </div>
 
