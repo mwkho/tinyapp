@@ -122,10 +122,11 @@ app.get('/urls/:shortURL', (req, res) => {
     res.redirect('/*');
     return;
   }
+  longURL = urlDatabase[shortURL].longURL;
   const templateVars = {
     user,
     shortURL,
-    longURL : urlDatabase[shortURL].longURL,
+    longURL
   };
   res.render('urls_show', templateVars);
 });
@@ -200,14 +201,15 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const user = getUser(req.cookies['user_id']);
   let longURL = req.body.longURL;
+  const shortURL = req.params.shortURL;
   // only update the database if non-empty input
   if (longURL){
-    urlDatabase[req.params.shortURL] = longURL;
+    urlDatabase[shortURL].longURL= longURL;
   }
   const templateVars = {
     user,
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    shortURL,
+    longURL: urlDatabase[shortURL].longURL,
   };
   res.render('urls_show', templateVars);
 });
