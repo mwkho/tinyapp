@@ -66,7 +66,12 @@ const generateRandomString = (num) => {
   return random;
 };
 
-
+const accessAllowed = (userId, shortURL,res) => {
+    if (userId !== urlDatabase[shortURL]['userId']) {
+      res.status(403).send('Error 403: Forbidden access')
+      return
+  };
+}
 /**TODO:
  * fix bug of shortenting an empty long url
  * 
@@ -116,13 +121,21 @@ app.get('/urls/new', (req, res) => {
 // routing to a page with short and long url
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const user = getUser(req.cookies['user_id']);
+  const userId = req.cookies['user_id'];
+  const user = getUser(req.cookies[userId]);
+
   // if the shortURL does not exist, send them to 404
-  if (Object.keys(urlDatabase).indexOf(shortURL) === -1) {
+  if (!urlDatabase[shortURL]) {
     res.redirect('/*');
     return;
   }
-  longURL = urlDatabase[shortURL].longURL;
+
+  if(userId !== urlDatabase[shortURL].userId){
+    res.status(403).send('Error 403: Forbidden Access');
+    return;
+  }
+  
+  const longURL = urlDatabase[shortURL].longURL;
   const templateVars = {
     user,
     shortURL,
@@ -141,7 +154,7 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/*', (req, res) => {
-  res.status(404).send('Error 404: Unable to find the requested resource!');
+  res.status(404).send('Error 404: Unable to find the requested resource!\n');
 });
 
 // post of registering a new user
@@ -150,13 +163,12 @@ app.post('/register', (req, res) => {
   const password = req.body.password.trim();
   
   if (!(email && password)){
-    console.log('im here')
-    res.status(400).send("400: email and password not allowed to be empty");
+    res.status(400).send('Error 400: email and password not allowed to be empty\n');
     return;
   }
 
   if(getUserId(email, password)){
-    res.status(400).send("400: User already exist");
+    res.status(400).send('Error 400: User already exist\n');
     return;
   }
   const userId = generateRandomString(6);
@@ -171,10 +183,12 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
   const userId = getUserId(req.body.email, req.body.password)
   if (!userId){
-    res.status(403).send('No such user exists');
+    res.status(403).send('No such user exists\n');
+    return
   }
   if (users[userId].password !== password){
-    res.status(403).send(`Incorrect password for email: ${email}`);
+    res.status(403).send(`Incorrect password for email: ${email}\n`);
+    return
   }
   res.cookie('user_id', userId);
   res.redirect('/urls');
@@ -186,7 +200,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-// making a POST request to change long url to short url
+// making a POST request for long url -> short url
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = req.body.longURL;
@@ -197,11 +211,18 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-// routing the post request to change the longURl
+// routing the post request to change(edit) the longURl
 app.post('/urls/:shortURL', (req, res) => {
-  const user = getUser(req.cookies['user_id']);
-  let longURL = req.body.longURL;
+  const userId = req.cookies['user_id'];
   const shortURL = req.params.shortURL;
+
+  if(userId !== urlDatabase[shortURL].userId){
+    res.status(403).send('Error 403: Forbidden Access\n');
+    return;
+  }
+
+  const user = getUser(userId);
+  const longURL = req.body.longURL;
   // only update the database if non-empty input
   if (longURL){
     urlDatabase[shortURL].longURL= longURL;
@@ -214,7 +235,15 @@ app.post('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+// deleting a url
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const shortURL = req.params.shortURL;
+
+  if(userId !== urlDatabase[shortURL].userId){
+    res.status(403).send('Error 403: Forbidden Access\n');
+    return;
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
