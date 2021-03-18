@@ -183,17 +183,18 @@ app.post('/register', (req, res) => {
     })
 })
 
-// setting up userId cookies for login
+// routing logIN
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userId = getUserId(req.body.email)
+  const userId = getUserId(email);
+
   if (!userId){
     res.status(403).send('No such user exists\n');
     return
   }
-  if (users[userId].password !== password){
-    res.status(403).send(`Incorrect password for email: ${email}\n`);
+  if (!bcrypt.compareSync(password, users[userId].password)){
+    res.status(403).send(`Incorrect password for email \n`);
     return
   }
   res.cookie('user_id', userId);
