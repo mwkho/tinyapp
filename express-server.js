@@ -11,8 +11,8 @@ app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "aJ48lW" },
-  "9sm5xK": {longURL: "http://www.google.com" , userId: "aJ48lW" }
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "abcde" },
+  "9sm5xK": {longURL: "http://www.google.com" , userId: "user1" }
 };
 
 const users = {
@@ -36,6 +36,15 @@ const addNewUser = (userId, email, password) => {
   };
 }
 
+const urlsForUser = (id) => {
+  const urls = {}
+  for (let url in urlDatabase){
+    if (urlDatabase[url].userId === id){
+      urls[url] = urlDatabase[url];
+    };
+  };
+  return urls;
+}
 const getUser = (id) => {
   return users[id];
 }
@@ -67,7 +76,15 @@ const generateRandomString = (num) => {
 // start of tinyapp
 app.get('/', (req, res) => {
   const user = getUser(req.cookies['user_id']);
-  const templateVars = {urls: urlDatabase, user};
+  const urls = urlsForUser(req.cookies['user_id']);
+  const templateVars = {urls, user};
+  res.render('urls_index', templateVars);
+});
+
+app.get('/urls', (req, res) => {
+  const user = getUser(req.cookies['user_id']);
+  const urls = urlsForUser(req.cookies['user_id']);
+  const templateVars = {urls, user};
   res.render('urls_index', templateVars);
 });
 
@@ -82,14 +99,6 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars)
 })
 
-app.get('/urls', (req, res) => {
-  const user = getUser(req.cookies['user_id']);
-  const templateVars = {
-    urls: urlDatabase,
-    user
-  };
-  res.render('urls_index', templateVars);
-});
 
 // routing to a page to submit a new url
 app.get('/urls/new', (req, res) => {
@@ -180,7 +189,10 @@ app.post('/logout', (req, res) => {
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = req.body.longURL;
-  urlDatabase[randomString].longURL = longURL;
+  urlDatabase[randomString] = {
+    longURL,
+    userId: req.cookies['user_id']
+  };
   res.redirect(`/urls/${randomString}`);
 });
 
