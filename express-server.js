@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const { render } = require('ejs');
 const app  = express();
 const PORT =  8080;
@@ -74,7 +75,7 @@ const accessAllowed = (userId, shortURL,res) => {
 }
 /**TODO:
  * fix bug of shortenting an empty long url
- * 
+ * refactor code (if possible)
  */
 
 
@@ -160,28 +161,33 @@ app.get('/*', (req, res) => {
 // post of registering a new user
 app.post('/register', (req, res) => {
   const email = req.body.email.trim();
-  const password = req.body.password.trim();
-  
-  if (!(email && password)){
+  const unhashPassword = req.body.password.trim();
+  const userId = generateRandomString(6);
+
+  if (!(email && unhashPassword)){
     res.status(400).send('Error 400: email and password not allowed to be empty\n');
     return;
-  }
-
-  if(getUserId(email, password)){
+  };
+  if(getUserId(email)){
     res.status(400).send('Error 400: User already exist\n');
     return;
-  }
-  const userId = generateRandomString(6);
-  addNewUser(userId, email, password);
-  res.cookie('user_id', userId);
-  res.redirect('/urls');
+  };
+
+  bcrypt.genSalt(10)
+  .then((salt) => {
+      bcrypt.hash(unhashPassword, salt, (err, hash) => {
+        addNewUser(userId, email, hash);
+        res.cookie('user_id', userId);
+        res.redirect('/urls');
+      })
+    })
 })
 
 // setting up userId cookies for login
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userId = getUserId(req.body.email, req.body.password)
+  const userId = getUserId(req.body.email)
   if (!userId){
     res.status(403).send('No such user exists\n');
     return
