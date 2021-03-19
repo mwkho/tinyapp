@@ -5,8 +5,15 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## Final Product
 
 !["The login page for users. Only users can create shorten URLS."](https://raw.githubusercontent.com/mwkho/tinyapp/master/docs/loginPage.png)
+
+The login page for users. Only users can create shorten URLS.
+
 !["The homepage showing a table of shortened URLs as well as the original with "Edit" and "Delete" options."](https://raw.githubusercontent.com/mwkho/tinyapp/master/docs/myURLS.png)
+
+The homepage showing a table of shortened URLs as well as the original with "Edit" and "Delete" options.
+
 !["The page to change where a shortened URL maps to."](https://raw.githubusercontent.com/mwkho/tinyapp/master/docs/shortenURL.png)
+The page to change where a shortened URL maps to.
 
 ## Dependencies
 
