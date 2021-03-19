@@ -29,12 +29,6 @@ const urlDatabase = {
 const users = {
 };
 
-/**TODO:
- * fix bug of shortenting an empty long url
- * refactor code (if possible)
- */
-
-
 // start of tinyapp
 app.get('/', (req, res) => {
   const userId = req.session.user_id
@@ -161,6 +155,10 @@ app.post('/logout', (req, res) => {
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = req.body.longURL;
+
+  if (! req.body.longURL){
+    return res.redirect('/urls/new');
+  }
   urlDatabase[randomString] = {
     longURL,
     userId: req.session.user_id
