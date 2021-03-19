@@ -1,31 +1,31 @@
 const addNewUser = (userId, email, password, database) => {
-  database[userId] = {     
+  database[userId] = {
     userId,
     email,
     password
   };
-}
+};
 
 const urlsForUser = (id, database) => {
-  const urls = {}
-  for (let url in database){
-    if (database[url].userId === id){
+  const urls = {};
+  for (let url in database) {
+    if (database[url].userId === id) {
       urls[url] = database[url];
-    };
-  };
+    }
+  }
   return urls;
-}
+};
 const getUser = (id, database) => {
   return database[id];
-}
+};
 
 const getUserId = (email, database) => {
-  for (let id in database){
-    if (database[id].email === email){
+  for (let id in database) {
+    if (database[id].email === email) {
       return id;
     }
   }
-}
+};
 
 const generateRandomString = (num) => {
   const char = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,4 +43,4 @@ module.exports = {
   getUserId,
   getUser,
   generateRandomString
-}
+};
