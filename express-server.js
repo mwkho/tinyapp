@@ -93,7 +93,11 @@ app.get('/urls/:shortURL', (req, res) => {
 });
    
 app.get('/u/:shortURL', (req,res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = urlDatabase[req.params.shortURL];
+  if (!shortURL){
+    return res.redirect('/*');
+  }
+  const longURL = shortURL.longURL;
   res.redirect(longURL);
 });
 
